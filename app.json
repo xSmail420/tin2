@@ -15,7 +15,9 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -24,14 +26,17 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.rip3rq.tindercloneyt"
+      "package": "com.rip3rq.tindercloneyt",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "5150e3a6-cd6a-4ff8-b32b-7a1c65ec6427"
+        "projectId": "7d2a8db6-7b83-4067-8338-f4a1d41e9361"
       }
     },
     "plugins": [

@@ -1,15 +1,6 @@
-node_modules/
-.expo/
-dist/
-npm-debug.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-*.orig.*
-web-build/
-testoweKonta.txt
-
-# macOS
-.DS_Store
+node_modules
+google-services.json
+@ismail_gr__tinder-clone-yt.jks
+credentials.json
+GoogleService-Info.plist
+credentials

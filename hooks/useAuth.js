@@ -14,6 +14,7 @@ import {
   signOut,
 } from "@firebase/auth";
 import { auth } from "../firebase";
+import { async } from "@firebase/util";
 
 const AuthContext = createContext({
   // initial state
@@ -23,12 +24,16 @@ WebBrowser.maybeCompleteAuthSession();
 
 const config = {
   androidClientId:
-    "296531923790-nbfkplbb146jbu2c2es0k0moag3rggon.apps.googleusercontent.com",
+    "76532762222-o90sgpu1gpuvn1rghug0tnrqbi2difvk.apps.googleusercontent.com",
+  iosClientId:
+    "76532762222-am6i3chavqu83apqevmj16l0lrqjo50l.apps.googleusercontent.com",
   scopes: ["profile", "email"],
   permissions: ["public_profile", "email", "gender", "location"],
 };
 
 export const AuthProvider = ({ children }) => {
+  
+
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
   const [loadingInitial, setLoadingInitial] = useState(true);
@@ -36,9 +41,11 @@ export const AuthProvider = ({ children }) => {
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId:
-      "296531923790-nbfkplbb146jbu2c2es0k0moag3rggon.apps.googleusercontent.com",
+      "76532762222-o90sgpu1gpuvn1rghug0tnrqbi2difvk.apps.googleusercontent.com",
+    iosClientId:
+      "76532762222-am6i3chavqu83apqevmj16l0lrqjo50l.apps.googleusercontent.com",
     expoClientId:
-      "296531923790-setrq21npudv6m80q64dv5jn1922suff.apps.googleusercontent.com",
+      "76532762222-bj9of2ocim5meq2puhv7iifn7o45mnda.apps.googleusercontent.com",
     scopes: ["profile", "email"],
     permissions: ["public_profile", "email", "gender", "location"],
   });
