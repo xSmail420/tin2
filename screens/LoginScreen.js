@@ -25,7 +25,7 @@ const LoginScreen = () => {
         resizeMode="cover"
         className="flex-1"
         source={{
-          uri: "https://tinder.com/static/tinder.png",
+          uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEv0J0y9g5WVF8prX14MnbiSdQU8mQC9vnFw&usqp=CAU",
         }}
       >
         <TouchableOpacity

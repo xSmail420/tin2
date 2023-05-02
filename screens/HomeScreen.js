@@ -31,17 +31,30 @@ const HomeScreen = () => {
   const navigation = useNavigation();
   const { user, logout } = useAuth();
   const swipeRef = useRef(null);
+  const [movies, setMovies] = useState([]);
   const [profiles, setProfiles] = useState([]);
 
-  useLayoutEffect(
-    () =>
-      onSnapshot(doc(db, "users", user.uid), (snapshot) => {
-        if (!snapshot.exists()) {
-          navigation.navigate("Modal");
-        }
-      }),
-    []
-  );
+  const [requestData, setRequestData] = useState({
+    api_key: "5bf66db933f207fc7fa8608cea3ffbc7",
+    page: 1,
+  });
+
+  useLayoutEffect(() => {
+    onSnapshot(doc(db, "users", user.uid), (snapshot) => {
+      if (!snapshot.exists()) {
+        navigation.navigate("Modal");
+      }
+    });
+    fetch(
+      `https://api.themoviedb.org/3/movie/popular?api_key=${requestData.api_key}&language=en-US&page=${requestData.page}`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        const results = data.results;
+        setMovies(results);
+      })
+      .catch((error) => console.log("error", error));
+  }, []);
 
   useEffect(() => {
     let unsub;
@@ -81,18 +94,18 @@ const HomeScreen = () => {
   }, [db]);
 
   const swipeLeft = async (cardIndex) => {
-    if (!profiles[cardIndex]) return;
+    if (!movies[cardIndex]) return;
 
-    const userSwiped = profiles[cardIndex];
+    const userSwiped = movies[cardIndex];
     console.log(`You swipe left on ${userSwiped.displayName}`);
 
     setDoc(doc(db, "users", user.uid, "passes", userSwiped.id), userSwiped);
   };
 
   const swipeRight = async (cardIndex) => {
-    if (!profiles[cardIndex]) return;
+    if (!movies[cardIndex]) return;
 
-    const userSwiped = profiles[cardIndex];
+    const userSwiped = movies[cardIndex];
     const loggedInProfile = await (
       await getDoc(doc(db, "users", user.uid))
     ).data();
@@ -151,7 +164,7 @@ const HomeScreen = () => {
         </TouchableOpacity>
         {/* LOGO ELEMENT*/}
         <TouchableOpacity onPress={() => navigation.navigate("Modal")}>
-          <Image source={require("../logo.png")} className="h-12 w-12" />
+          <Image source={require("../logo.png")} className="h-12 w-12" style={{tintColor:"#FF3854"}} />
         </TouchableOpacity>
         {/* MESSAGES ELEMENT */}
         <TouchableOpacity onPress={() => navigation.navigate("Chat")}>
@@ -165,7 +178,7 @@ const HomeScreen = () => {
         <Swiper
           ref={swipeRef}
           containerStyle={{ backgroundColor: "transparent" }}
-          cards={profiles}
+          cards={movies}
           stackSize={5}
           cardIndex={0}
           animateCardOpacity
@@ -188,7 +201,7 @@ const HomeScreen = () => {
               },
             },
             right: {
-              title: "MATCH",
+              title: "LIKE",
               style: {
                 label: {
                   textAlign: "left",
@@ -206,20 +219,46 @@ const HomeScreen = () => {
               >
                 <Image
                   source={{
-                    uri: card.photoURL,
+                    uri: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${card.poster_path}`,
                   }}
                   className="absolute top-0 h-full w-full rounded-xl"
                 />
-                <View className="absolute bottom-0 bg-neutral-400/[.2] w-full h-20 justify-between items-center flex-row px-6 py-2 rounded-b-xl">
-                  <View>
-                    <Text className="text-white text-3xl font-bold">
-                      {card.displayName}
-                    </Text>
-                    <Text className="text-white text-lg">{card.job}</Text>
-                  </View>
-                  <Text className="text-white text-2xl font-bold">
-                    {card.age}
+                <View
+                  style={{
+                    flexDirection:'row',
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text
+                    numberOfLines={1}
+                    className="text-white text-2xl font-bold px-2 py-2"
+                  >
+                    {card.vote_average}
                   </Text>
+                  <Ionicons
+                    name="star"
+                    size={25}
+                    color="#ffdf00"
+                    className="top-0 py-2"
+                  />
+                </View>
+                <View style={{backgroundColor: 'rgba(0,0,0,0.7)'}} className="absolute bottom-0 bg-neutral-400/[.2] w-full h-20 justify-between items-center flex-row px-6 py-2 rounded-b-xl">
+                  <View >
+                    <Text
+                      numberOfLines={1}
+                      className="text-white text-2xl font-bold"
+                    >
+                      {card.original_title}
+                    </Text>
+                    <Text
+                      numberOfLines={2}
+                      style={styles.text}
+                      className="text-white text-lg"
+                    >
+                      {card.overview}
+                    </Text>
+                  </View>
                 </View>
               </View>
             ) : (
@@ -227,7 +266,9 @@ const HomeScreen = () => {
                 className="relative bg-white h-4/5 rounded-xl justify-center items-center"
                 style={styles.cardShadow}
               >
-                <Text className="pb-5 font-bold">No more profiles!</Text>
+                <Text className="pb-5 font-bold">
+                  No more movies at the moment!
+                </Text>
                 <Image
                   className="h-20 w-20"
                   source={{
@@ -276,5 +317,10 @@ const styles = StyleSheet.create({
     shadowRadius: 1.41,
 
     elevation: 20,
+  },
+  text: {
+    fontSize: 12,
+    textAlign: "justify",
+    lineHeight: 20,
   },
 });
