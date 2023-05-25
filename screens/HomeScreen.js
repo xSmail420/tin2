@@ -33,11 +33,24 @@ const HomeScreen = () => {
   const swipeRef = useRef(null);
   const [movies, setMovies] = useState([]);
   const [profiles, setProfiles] = useState([]);
+  const [cardInd, setCardInd] = useState(0);
 
   const [requestData, setRequestData] = useState({
     api_key: "5bf66db933f207fc7fa8608cea3ffbc7",
     page: 1,
   });
+
+  useEffect(() => {
+    if (cardInd == movies.length - 2) {
+      setRequestData({
+        ...requestData,
+        ...{ page: requestData.page + 1 },
+      });
+      // console.log("====================================");
+      // console.log(requestData);
+      // console.log("====================================");
+    }
+  }, [cardInd]);
 
   useLayoutEffect(() => {
     onSnapshot(doc(db, "users", user.uid), (snapshot) => {
@@ -51,32 +64,28 @@ const HomeScreen = () => {
       .then((response) => response.json())
       .then((data) => {
         const results = data.results;
-        setMovies(results);
-        console.log("====================================");
-        // console.log(results.length());
-        console.log("====================================");
+        setMovies([...movies , ...results]);
       })
       .catch((error) => console.log("error", error));
-  }, []);
+  }, [requestData]);
 
   useEffect(() => {
     let unsub;
     const fetchCards = async () => {
-      // all passes
+
       const passes = await getDocs(
-        collection(db, "users", user.uid, "passes")
+        collection(db, "users", user.uid, "Nope")
       ).then((snapshot) => snapshot.docs.map((doc) => doc.id));
       const swipes = await getDocs(
-        collection(db, "users", user.uid, "swipes")
+        collection(db, "users", user.uid, "Like")
       ).then((snapshot) => snapshot.docs.map((doc) => doc.id));
 
       const passesUserIds = passes.length > 0 ? passes : ["test"];
       const swipedUserIds = swipes.length > 0 ? swipes : ["test"];
 
-      // fetch FILTERED data from firebase to variable as objects
       unsub = onSnapshot(
         query(
-          collection(db, "users"),
+          collection(db, "users" ),
           where("id", "not-in", [...passesUserIds, ...swipedUserIds])
         ),
         (snapshot) => {
@@ -97,86 +106,97 @@ const HomeScreen = () => {
   }, [db]);
 
   const swipeLeft = async (cardIndex) => {
-    // if (!movies[cardIndex]) return;
-    // const userSwiped = movies[cardIndex];
-    // console.log(`You swipe left on ${userSwiped.displayName}`);
-    // setDoc(doc(db, "users", user.uid, "passes", userSwiped.id), userSwiped);
-    // add match manually
-    //adding match manually
-    // const userSwiped = await (
-    //   await getDoc(doc(db, "users", "u8yjQ6ZmkONls2J8Z3Jv0zQQUnt1"))
-    // ).data();
-    // const loggedInProfile = await (
-    //   await getDoc(doc(db, "users", "L80xGsha6aMRdic2VAbJKmDuUDS2"))
-    // ).data();
-    // setDoc(doc(db, "matches", generateId(user.uid, userSwiped.id)), {
-    //   users: {
-    //     [user.uid]: loggedInProfile,
-    //     [userSwiped.id]: userSwiped,
-    //   },
-    //   usersMatched: [user.uid, userSwiped.id],
-    //   timestamp: serverTimestamp(),
-    // });
-    // console.log("====================================");
-    // console.log(`user1: ${loggedInProfile}  \nuser2: ${userSwiped}`);
-    // console.log("====================================");
+    setCardInd(cardIndex);
+    if (!movies[cardIndex]) return;
+    const movie_Info = movies[cardIndex];
+    const userUid = user.uid; 
+    try {
+      await setDoc(
+        doc(db, "users", userUid, "Nope", movie_Info.id.toString()),
+        movie_Info
+      );
+    } catch (error) {
+      console.log("Erreur lors de la sauvegarde des données :", error);
+      
+    }
   };
 
   const swipeRight = async (cardIndex) => {
-    //   if (!movies[cardIndex]) return;
-    //   const userSwiped = movies[cardIndex];
-    //   const loggedInProfile = await (
-    //     await getDoc(doc(db, "users", user.uid))
-    //   ).data();
-    //   // console info
-    //   console.log(`You swipe right on ${userSwiped.displayName}`);
-    //   // Check if the user swiped on you...
-    //   getDoc(doc(db, "users", userSwiped.id, "swipes", user.uid)).then(
-    //     (DocumentSnapshot) => {
-    //       if (DocumentSnapshot.exists()) {
-    //         // User has matched with you before you matched with them...
-    //         console.log(`LETS GO! You matched with ${userSwiped.displayName}!`);
-    //         setDoc(
-    //           doc(db, "users", user.uid, "swipes", userSwiped.id),
-    //           userSwiped
-    //         );
-    //         // CREATE A MATCH!
-    //         setDoc(doc(db, "matches", generateId(user.uid, userSwiped.id)), {
-    //           users: {
-    //             [user.uid]: loggedInProfile,
-    //             [userSwiped.id]: userSwiped,
-    //           },
-    //           usersMatched: [user.uid, userSwiped.id],
-    //           timestamp: serverTimestamp(),
-    //         });
-    //         navigation.navigate("Match", {
-    //           loggedInProfile,
-    //           userSwiped,
-    //         });
-    //       } else {
-    //         // User has swiped as first interaction between the two...
-    //         console.log(`You swiped on ${userSwiped.displayName}!`);
-    //         setDoc(
-    //           doc(db, "users", user.uid, "swipes", userSwiped.id),
-    //           userSwiped
-    //         );
-    //       }
-    //     }
-    //   );
-    //   setDoc(doc(db, "users", user.uid, "swipes", userSwiped.id), userSwiped);
+    setCardInd(cardIndex);
+    if (!movies[cardIndex]) return;
+    const movie_Info = movies[cardIndex];
+    const userUid = user.uid; 
+    
+    try {
+      await setDoc(
+        doc(db, "users", userUid, "Like", movie_Info.id.toString()),
+        movie_Info
+      );
+    } catch (error) {
+      console.log("Erreur lors de la sauvegarde des données :", error);
+    }
   };
 
-  const viewMovie = (cardIndex) => { 
-    navigation.navigate("Modal")
-    if (!movies[cardIndex]) return;
-    const movieData = movies[cardIndex];
-  }
+  // const swipeRight = async (cardIndex) => {
+  //   setCardInd(cardIndex);
+
+  //   if (!movies[cardIndex]) return;
+  //   const movie_Info = movies[cardIndex].id;
+  //   setDoc(doc(db, "users", user.uid, "Like", movie_Info.id), movie_Info);
+
+      // if (!movies[cardIndex]) return;
+      // const movie_Id = movies[cardIndex];
+      // const loggedInProfile = await (
+      //   await getDoc(doc(db, "users", user.uid))
+      // ).data();
+      // // console info
+      // console.log(`You swipe right on ${movie_Id.displayName}`);
+      // // Check if the user swiped on you...
+      // getDoc(doc(db, "users", movie_Id.id, "swipes", user.uid)).then(
+      //   (DocumentSnapshot) => {
+      //     if (DocumentSnapshot.exists()) {
+      //       // User has matched with you before you matched with them...
+      //       console.log(`LETS GO! You matched with ${movie_Id.displayName}!`);
+      //       setDoc(
+      //         doc(db, "users", user.uid, "swipes", movie_Id.id),
+      //         movie_Id
+      //       );
+      //       // CREATE A MATCH!
+      //       setDoc(doc(db, "matches", generateId(user.uid, movie_Id.id)), {
+      //         users: {
+      //           [user.uid]: loggedInProfile,
+      //           [movie_Id.id]: movie_Id,
+      //         },
+      //         usersMatched: [user.uid, movie_Id.id],
+      //         timestamp: serverTimestamp(),
+      //       });
+      //       navigation.navigate("Match", {
+      //         loggedInProfile,
+      //         movie_Id,
+      //       });
+      //     } else {
+      //       // User has swiped as first interaction between the two...
+      //       console.log(`You swiped on ${movie_Id.displayName}!`);
+      //       setDoc(
+      //         doc(db, "users", user.uid, "swipes", movie_Id.id),
+      //         movie_Id
+      //       );
+      //     }
+      //   }
+      // );
+      // setDoc(doc(db, "users", user.uid, "swipes", movie_Id.id), movie_Id);
+  // };
+
+  const viewMovie = (movieId) => {
+    if (!movieId) return;
+    navigation.navigate("Movie", {
+      movieId,
+    });
+  };
 
   return (
     <SafeAreaView className="flex-1 top-2">
-      {/* HEADER */}
       <View className="flex-row items-center justify-between relative px-5">
-        {/* AVATAR ELEMENT*/}
         <TouchableOpacity onPress={logout}>
           <Image
             source={{
@@ -185,22 +205,20 @@ const HomeScreen = () => {
             className="h-10 w-10 rounded-full"
           />
         </TouchableOpacity>
-        {/* LOGO ELEMENT*/}
-        <TouchableOpacity onPress={() => navigation.navigate("Movie")}>
+
+        <TouchableOpacity onPress={() => navigation.navigate("Modal")}>
           <Image
             source={require("../logo.png")}
             className="h-12 w-12"
             style={{ tintColor: "#FF3854" }}
           />
         </TouchableOpacity>
-        {/* MESSAGES ELEMENT */}
+
         <TouchableOpacity onPress={() => navigation.navigate("Chat")}>
           <Ionicons name="chatbubbles-sharp" size={45} color="#FF5864" />
         </TouchableOpacity>
       </View>
-      {/* END OF HEADER */}
 
-      {/* SWIPER CARDS */}
       <View className="flex-1 -mt-6">
         <Swiper
           ref={swipeRef}
@@ -273,7 +291,7 @@ const HomeScreen = () => {
 
                 <TouchableOpacity
                   className="absolute opacity-90 items-center mx-2 bottom-20 h-16 w-16 rounded-xl"
-                  onPress={(cardIndex) => viewMovie(cardIndex)}
+                  onPress={() => viewMovie(card.id)}
                 >
                   <Image
                     source={{

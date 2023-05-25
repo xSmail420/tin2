@@ -53,6 +53,7 @@ const MessagesScreen = () => {
   );
 
   const sendMessage = () => {
+    if (input === "") return;
     addDoc(collection(db, "matches", matchDetails.id, "messages"), {
       timestamp: serverTimestamp(),
       userId: user.uid,

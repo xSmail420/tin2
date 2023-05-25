@@ -34,9 +34,6 @@ const StackNavigator = () => {
             <Stack.Screen name="Modal" component={ModalScreen} />
           </Stack.Group>
           <Stack.Group
-            screenOptions={{
-              presentation: "Movie",
-            }}
           >
             <Stack.Screen name="Movie" component={MovieScreen} />
           </Stack.Group>
