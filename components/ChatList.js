@@ -36,7 +36,7 @@ const ChatList = () => {
     />
   ) : (
     <View>
-      <Text>No matches at the moment!🥶</Text>
+      <Text>No Friends at the moment!🥶</Text>
     </View>
   );
 };

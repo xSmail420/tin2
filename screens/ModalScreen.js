@@ -35,7 +35,7 @@ const ModalScreen = () => {
         className="h-20 w-full"
         resizeMode="contain"
         source={{
-          uri: "https://links.papareact.com/2pf",
+          uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtSJ64vmb3nxIWURqS_MJo92BLXbqnidjD9EGb5IheFtNheIR6zPZXl-NDmBSZv6JD_Ds&usqp=CAU",
         }}
       />
       <Text className="text-xl text-gray-500 p-2 font-bold">

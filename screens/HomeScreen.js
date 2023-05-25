@@ -52,6 +52,9 @@ const HomeScreen = () => {
       .then((data) => {
         const results = data.results;
         setMovies(results);
+        console.log("====================================");
+        // console.log(results.length());
+        console.log("====================================");
       })
       .catch((error) => console.log("error", error));
   }, []);
@@ -94,60 +97,80 @@ const HomeScreen = () => {
   }, [db]);
 
   const swipeLeft = async (cardIndex) => {
-    if (!movies[cardIndex]) return;
-
-    const userSwiped = movies[cardIndex];
-    console.log(`You swipe left on ${userSwiped.displayName}`);
-
-    setDoc(doc(db, "users", user.uid, "passes", userSwiped.id), userSwiped);
+    // if (!movies[cardIndex]) return;
+    // const userSwiped = movies[cardIndex];
+    // console.log(`You swipe left on ${userSwiped.displayName}`);
+    // setDoc(doc(db, "users", user.uid, "passes", userSwiped.id), userSwiped);
+    // add match manually
+    //adding match manually
+    // const userSwiped = await (
+    //   await getDoc(doc(db, "users", "u8yjQ6ZmkONls2J8Z3Jv0zQQUnt1"))
+    // ).data();
+    // const loggedInProfile = await (
+    //   await getDoc(doc(db, "users", "L80xGsha6aMRdic2VAbJKmDuUDS2"))
+    // ).data();
+    // setDoc(doc(db, "matches", generateId(user.uid, userSwiped.id)), {
+    //   users: {
+    //     [user.uid]: loggedInProfile,
+    //     [userSwiped.id]: userSwiped,
+    //   },
+    //   usersMatched: [user.uid, userSwiped.id],
+    //   timestamp: serverTimestamp(),
+    // });
+    // console.log("====================================");
+    // console.log(`user1: ${loggedInProfile}  \nuser2: ${userSwiped}`);
+    // console.log("====================================");
   };
 
   const swipeRight = async (cardIndex) => {
-    if (!movies[cardIndex]) return;
-
-    const userSwiped = movies[cardIndex];
-    const loggedInProfile = await (
-      await getDoc(doc(db, "users", user.uid))
-    ).data();
-
-    // console info
-    console.log(`You swipe right on ${userSwiped.displayName}`);
-
-    // Check if the user swiped on you...
-    getDoc(doc(db, "users", userSwiped.id, "swipes", user.uid)).then(
-      (DocumentSnapshot) => {
-        if (DocumentSnapshot.exists()) {
-          // User has matched with you before you matched with them...
-          console.log(`LETS GO! You matched with ${userSwiped.displayName}!`);
-          setDoc(
-            doc(db, "users", user.uid, "swipes", userSwiped.id),
-            userSwiped
-          );
-          // CREATE A MATCH!
-          setDoc(doc(db, "matches", generateId(user.uid, userSwiped.id)), {
-            users: {
-              [user.uid]: loggedInProfile,
-              [userSwiped.id]: userSwiped,
-            },
-            usersMatched: [user.uid, userSwiped.id],
-            timestamp: serverTimestamp(),
-          });
-          navigation.navigate("Match", {
-            loggedInProfile,
-            userSwiped,
-          });
-        } else {
-          // User has swiped as first interaction between the two...
-          console.log(`You swiped on ${userSwiped.displayName}!`);
-          setDoc(
-            doc(db, "users", user.uid, "swipes", userSwiped.id),
-            userSwiped
-          );
-        }
-      }
-    );
-    setDoc(doc(db, "users", user.uid, "swipes", userSwiped.id), userSwiped);
+    //   if (!movies[cardIndex]) return;
+    //   const userSwiped = movies[cardIndex];
+    //   const loggedInProfile = await (
+    //     await getDoc(doc(db, "users", user.uid))
+    //   ).data();
+    //   // console info
+    //   console.log(`You swipe right on ${userSwiped.displayName}`);
+    //   // Check if the user swiped on you...
+    //   getDoc(doc(db, "users", userSwiped.id, "swipes", user.uid)).then(
+    //     (DocumentSnapshot) => {
+    //       if (DocumentSnapshot.exists()) {
+    //         // User has matched with you before you matched with them...
+    //         console.log(`LETS GO! You matched with ${userSwiped.displayName}!`);
+    //         setDoc(
+    //           doc(db, "users", user.uid, "swipes", userSwiped.id),
+    //           userSwiped
+    //         );
+    //         // CREATE A MATCH!
+    //         setDoc(doc(db, "matches", generateId(user.uid, userSwiped.id)), {
+    //           users: {
+    //             [user.uid]: loggedInProfile,
+    //             [userSwiped.id]: userSwiped,
+    //           },
+    //           usersMatched: [user.uid, userSwiped.id],
+    //           timestamp: serverTimestamp(),
+    //         });
+    //         navigation.navigate("Match", {
+    //           loggedInProfile,
+    //           userSwiped,
+    //         });
+    //       } else {
+    //         // User has swiped as first interaction between the two...
+    //         console.log(`You swiped on ${userSwiped.displayName}!`);
+    //         setDoc(
+    //           doc(db, "users", user.uid, "swipes", userSwiped.id),
+    //           userSwiped
+    //         );
+    //       }
+    //     }
+    //   );
+    //   setDoc(doc(db, "users", user.uid, "swipes", userSwiped.id), userSwiped);
   };
+
+  const viewMovie = (cardIndex) => { 
+    navigation.navigate("Modal")
+    if (!movies[cardIndex]) return;
+    const movieData = movies[cardIndex];
+  }
 
   return (
     <SafeAreaView className="flex-1 top-2">
@@ -163,8 +186,12 @@ const HomeScreen = () => {
           />
         </TouchableOpacity>
         {/* LOGO ELEMENT*/}
-        <TouchableOpacity onPress={() => navigation.navigate("Modal")}>
-          <Image source={require("../logo.png")} className="h-12 w-12" style={{tintColor:"#FF3854"}} />
+        <TouchableOpacity onPress={() => navigation.navigate("Movie")}>
+          <Image
+            source={require("../logo.png")}
+            className="h-12 w-12"
+            style={{ tintColor: "#FF3854" }}
+          />
         </TouchableOpacity>
         {/* MESSAGES ELEMENT */}
         <TouchableOpacity onPress={() => navigation.navigate("Chat")}>
@@ -225,7 +252,7 @@ const HomeScreen = () => {
                 />
                 <View
                   style={{
-                    flexDirection:'row',
+                    flexDirection: "row",
                     justifyContent: "flex-start",
                     alignItems: "center",
                   }}
@@ -243,8 +270,23 @@ const HomeScreen = () => {
                     className="top-0 py-2"
                   />
                 </View>
-                <View style={{backgroundColor: 'rgba(0,0,0,0.7)'}} className="absolute bottom-0 bg-neutral-400/[.2] w-full h-20 justify-between items-center flex-row px-6 py-2 rounded-b-xl">
-                  <View >
+
+                <TouchableOpacity
+                  className="absolute opacity-90 items-center mx-2 bottom-20 h-16 w-16 rounded-xl"
+                  onPress={(cardIndex) => viewMovie(cardIndex)}
+                >
+                  <Image
+                    source={{
+                      uri: "https://cdn.discordapp.com/attachments/1057858293789380629/1111071665837846598/View.png",
+                    }}
+                    className="h-16 w-16"
+                  />
+                </TouchableOpacity>
+                <View
+                  style={{ backgroundColor: "rgba(0,0,0,0.7)" }}
+                  className="absolute bottom-0 bg-neutral-400/[.2] w-full h-20 justify-between items-center flex-row px-6 py-2 rounded-b-xl"
+                >
+                  <View>
                     <Text
                       numberOfLines={1}
                       className="text-white text-2xl font-bold"
