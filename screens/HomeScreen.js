@@ -33,7 +33,7 @@ const HomeScreen = () => {
   const { user, logout } = useAuth();
   const swipeRef = useRef(null);
   const [movies, setMovies] = useState([]);
-  const [profiles, setProfiles] = useState([]);
+  const [newMovies, setNewMovies] = useState([]);
   const [cardInd, setCardInd] = useState(0);
 
   const [requestData, setRequestData] = useState({
@@ -62,10 +62,10 @@ const HomeScreen = () => {
     )
       .then((response) => response.json())
       .then((data) => {
-        const results = data.results;
-        setMovies([...movies, ...results]);
+        fetchCards(data.results);
       })
       .catch((error) => console.log("error", error));
+      
   }, [requestData.page]);
 
   useEffect(() => {
@@ -74,46 +74,41 @@ const HomeScreen = () => {
     )
     .then((response) => response.json())
     .then((data) => {
-      const results = data.results;
-      setMovies(results);
+      fetchCards(data.results,true);
     })
     .catch((error) => console.log("error", error));
   }, [requestData.category]);
 
-  useEffect(() => {
-    let unsub;
-    const fetchCards = async () => {
-      const passes = await getDocs(
-        collection(db, "users", user.uid, "Nope")
-      ).then((snapshot) => snapshot.docs.map((doc) => doc.id));
-      const swipes = await getDocs(
-        collection(db, "users", user.uid, "Like")
-      ).then((snapshot) => snapshot.docs.map((doc) => doc.id));
 
-      const passesUserIds = passes.length > 0 ? passes : ["test"];
-      const swipedUserIds = swipes.length > 0 ? swipes : ["test"];
+  const fetchCards = async (newMovies, reset = false) => {
 
-      unsub = onSnapshot(
-        query(
-          collection(db, "users"),
-          where("id", "not-in", [...passesUserIds, ...swipedUserIds])
-        ),
-        (snapshot) => {
-          setProfiles(
-            snapshot.docs
-              .filter((doc) => doc.id !== user.uid)
-              .map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-              }))
-          );
-        }
-      );
-    };
+    const passes = await getDocs(
+      collection(db, "users", user.uid, "Nope")
+    ).then((snapshot) => snapshot.docs.map((doc) => doc.id.toString()));
+    const swipes = await getDocs(
+      collection(db, "users", user.uid, "Like")
+    ).then((snapshot) => snapshot.docs.map((doc) => doc.id.toString()));
 
-    fetchCards();
-    return unsub;
-  }, [db]);
+    const passesUserIds = passes.length > 0 ? passes : [];
+    const swipedUserIds = swipes.length > 0 ? swipes : [];
+    
+      filtered = newMovies.filter(movie => !passesUserIds.includes(movie.id.toString()) && !swipedUserIds.includes(movie.id.toString()))
+        
+    
+    if (filtered.length == 0) {
+      setRequestData({
+        ...requestData,
+        ...{ page: requestData.page + 1 },
+      });
+    }
+    if (reset) {
+      setMovies(filtered);
+    } else {
+      setMovies([...movies,...filtered]);
+    }
+    
+    }
+
 
   const swipeLeft = async (cardIndex) => {
     setCardInd(cardIndex);
@@ -141,7 +136,7 @@ const HomeScreen = () => {
         doc(db, "users", userUid, "Like", movie_Info.id.toString()),
         movie_Info
       );
-      createMatch();
+      // createMatch();
     } catch (error) {
       console.log("Erreur lors de la sauvegarde des données :", error);
     }
