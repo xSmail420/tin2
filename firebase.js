@@ -8,6 +8,7 @@ import { getFirestore } from "firebase/firestore";
 const firebaseConfig = {
   apiKey: "AIzaSyDJ9sVtJnU-4wW4Aku9ERk2BujnGftD7mM",
   authDomain: "tin2-385301.firebaseapp.com",
+  databaseURL: "https://tin2-385301-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "tin2-385301",
   storageBucket: "tin2-385301.appspot.com",
   messagingSenderId: "76532762222",

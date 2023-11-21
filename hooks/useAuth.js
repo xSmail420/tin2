@@ -69,7 +69,8 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setLoading(true);
-
+    Google.revokeAccess();
+    Google.signOut();
     signOut(auth)
       .catch((error) => setError(error))
       .finally(() => setLoading(false));

@@ -5,7 +5,7 @@ const MatchedScreen = () => {
   const navigation = useNavigation();
   const { params } = useRoute();
 
-  const { loggedInProfile, userSwiped } = params;
+  const { loggedInProfile, usersMatchedProfile } = params;
 
   return (
     <View className="h-full bg-red-500 pt-20">
@@ -17,7 +17,7 @@ const MatchedScreen = () => {
       </View>
 
       <Text className="text-white text-center mt-5">
-        You and {userSwiped.displayName} have liked each other!
+        You and {usersMatchedProfile.displayName} have liked each other!
       </Text>
 
       <View className="flex-row justify-evenly mt-8">
@@ -30,7 +30,7 @@ const MatchedScreen = () => {
         <Image
           className="h-32 w-32 rounded-full"
           source={{
-            uri: userSwiped.photoURL,
+            uri: usersMatchedProfile.photoURL,
           }}
         />
       </View>

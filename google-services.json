@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "76532762222",
+    "firebase_url": "https://tin2-385301-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "tin2-385301",
     "storage_bucket": "tin2-385301.appspot.com"
   },
@@ -35,7 +36,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "76532762222-lb7hrstvk8t4vfgie9ub1e77o7q4cb33.apps.googleusercontent.com",
+              "client_id": "76532762222-bj9of2ocim5meq2puhv7iifn7o45mnda.apps.googleusercontent.com",
               "client_type": 3
             },
             {

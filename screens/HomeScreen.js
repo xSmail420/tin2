@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
+  DevSettings,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import useAuth from "../hooks/useAuth";
@@ -25,7 +26,7 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../firebase";
-import generateId from "../lib/generateId";
+import RNPickerSelect from "react-native-picker-select";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -38,6 +39,7 @@ const HomeScreen = () => {
   const [requestData, setRequestData] = useState({
     api_key: "5bf66db933f207fc7fa8608cea3ffbc7",
     page: 1,
+    category: "popular",
   });
 
   useEffect(() => {
@@ -46,9 +48,6 @@ const HomeScreen = () => {
         ...requestData,
         ...{ page: requestData.page + 1 },
       });
-      // console.log("====================================");
-      // console.log(requestData);
-      // console.log("====================================");
     }
   }, [cardInd]);
 
@@ -59,20 +58,31 @@ const HomeScreen = () => {
       }
     });
     fetch(
-      `https://api.themoviedb.org/3/movie/popular?api_key=${requestData.api_key}&language=en-US&page=${requestData.page}`
+      `https://api.themoviedb.org/3/movie/${requestData.category}?api_key=${requestData.api_key}&language=en-US&page=${requestData.page}`
     )
       .then((response) => response.json())
       .then((data) => {
         const results = data.results;
-        setMovies([...movies , ...results]);
+        setMovies([...movies, ...results]);
       })
       .catch((error) => console.log("error", error));
-  }, [requestData]);
+  }, [requestData.page]);
+
+  useEffect(() => {
+    fetch(
+      `https://api.themoviedb.org/3/movie/${requestData.category}?api_key=${requestData.api_key}&language=en-US&page=${requestData.page}`
+    )
+    .then((response) => response.json())
+    .then((data) => {
+      const results = data.results;
+      setMovies(results);
+    })
+    .catch((error) => console.log("error", error));
+  }, [requestData.category]);
 
   useEffect(() => {
     let unsub;
     const fetchCards = async () => {
-
       const passes = await getDocs(
         collection(db, "users", user.uid, "Nope")
       ).then((snapshot) => snapshot.docs.map((doc) => doc.id));
@@ -85,7 +95,7 @@ const HomeScreen = () => {
 
       unsub = onSnapshot(
         query(
-          collection(db, "users" ),
+          collection(db, "users"),
           where("id", "not-in", [...passesUserIds, ...swipedUserIds])
         ),
         (snapshot) => {
@@ -109,7 +119,7 @@ const HomeScreen = () => {
     setCardInd(cardIndex);
     if (!movies[cardIndex]) return;
     const movie_Info = movies[cardIndex];
-    const userUid = user.uid; 
+    const userUid = user.uid;
     try {
       await setDoc(
         doc(db, "users", userUid, "Nope", movie_Info.id.toString()),
@@ -117,7 +127,6 @@ const HomeScreen = () => {
       );
     } catch (error) {
       console.log("Erreur lors de la sauvegarde des données :", error);
-      
     }
   };
 
@@ -125,18 +134,54 @@ const HomeScreen = () => {
     setCardInd(cardIndex);
     if (!movies[cardIndex]) return;
     const movie_Info = movies[cardIndex];
-    const userUid = user.uid; 
-    
+    const userUid = user.uid;
+
     try {
       await setDoc(
         doc(db, "users", userUid, "Like", movie_Info.id.toString()),
         movie_Info
       );
+      createMatch();
     } catch (error) {
       console.log("Erreur lors de la sauvegarde des données :", error);
     }
   };
 
+
+  const createMatch = async () => {
+    //create match with the two users
+    id_user2 = "QsXPGlspVyXysGUoYYZ7uHCUnRv2"
+    if ("QsXPGlspVyXysGUoYYZ7uHCUnRv2" == user.uid) {
+      id_user2 = "rW5RTPXMCRfFBrMBZsIACr6lHsv1"
+    }
+
+    const loggedInProfile = await (
+      await getDoc(doc(db, "users", user.uid))
+    ).data();
+          
+    const usersMatchedProfile = await (
+      await getDoc(doc(db, "users", id_user2))
+    ).data();
+
+    setDoc(doc(db, "matches", generateId(user.uid, id_user2)), {
+      users: {
+        [user.uid]: loggedInProfile,
+        [id_user2]: usersMatchedProfile,
+      },
+      usersMatched: [user.uid, id_user2],
+      timestamp: serverTimestamp(),
+    });
+
+    navigation.navigate("Match", {
+      loggedInProfile,
+      usersMatchedProfile,
+    });
+
+  }
+
+  const generateId = (id1 , id2) => {
+    return (id1+id2)
+  }
   // const swipeRight = async (cardIndex) => {
   //   setCardInd(cardIndex);
 
@@ -144,47 +189,47 @@ const HomeScreen = () => {
   //   const movie_Info = movies[cardIndex].id;
   //   setDoc(doc(db, "users", user.uid, "Like", movie_Info.id), movie_Info);
 
-      // if (!movies[cardIndex]) return;
-      // const movie_Id = movies[cardIndex];
-      // const loggedInProfile = await (
-      //   await getDoc(doc(db, "users", user.uid))
-      // ).data();
-      // // console info
-      // console.log(`You swipe right on ${movie_Id.displayName}`);
-      // // Check if the user swiped on you...
-      // getDoc(doc(db, "users", movie_Id.id, "swipes", user.uid)).then(
-      //   (DocumentSnapshot) => {
-      //     if (DocumentSnapshot.exists()) {
-      //       // User has matched with you before you matched with them...
-      //       console.log(`LETS GO! You matched with ${movie_Id.displayName}!`);
-      //       setDoc(
-      //         doc(db, "users", user.uid, "swipes", movie_Id.id),
-      //         movie_Id
-      //       );
-      //       // CREATE A MATCH!
-      //       setDoc(doc(db, "matches", generateId(user.uid, movie_Id.id)), {
-      //         users: {
-      //           [user.uid]: loggedInProfile,
-      //           [movie_Id.id]: movie_Id,
-      //         },
-      //         usersMatched: [user.uid, movie_Id.id],
-      //         timestamp: serverTimestamp(),
-      //       });
-      //       navigation.navigate("Match", {
-      //         loggedInProfile,
-      //         movie_Id,
-      //       });
-      //     } else {
-      //       // User has swiped as first interaction between the two...
-      //       console.log(`You swiped on ${movie_Id.displayName}!`);
-      //       setDoc(
-      //         doc(db, "users", user.uid, "swipes", movie_Id.id),
-      //         movie_Id
-      //       );
-      //     }
-      //   }
-      // );
-      // setDoc(doc(db, "users", user.uid, "swipes", movie_Id.id), movie_Id);
+  // if (!movies[cardIndex]) return;
+  // const movie_Id = movies[cardIndex];
+  // const loggedInProfile = await (
+  //   await getDoc(doc(db, "users", user.uid))
+  // ).data();
+  // // console info
+  // console.log(`You swipe right on ${movie_Id.displayName}`);
+  // // Check if the user swiped on you...
+  // getDoc(doc(db, "users", movie_Id.id, "swipes", user.uid)).then(
+  //   (DocumentSnapshot) => {
+  //     if (DocumentSnapshot.exists()) {
+  //       // User has matched with you before you matched with them...
+  //       console.log(`LETS GO! You matched with ${movie_Id.displayName}!`);
+  //       setDoc(
+  //         doc(db, "users", user.uid, "swipes", movie_Id.id),
+  //         movie_Id
+  //       );
+  //       // CREATE A MATCH!
+  //       setDoc(doc(db, "matches", generateId(user.uid, movie_Id.id)), {
+  //         users: {
+  //           [user.uid]: loggedInProfile,
+  //           [movie_Id.id]: movie_Id,
+  //         },
+  //         usersMatched: [user.uid, movie_Id.id],
+  //         timestamp: serverTimestamp(),
+  //       });
+  //       navigation.navigate("Match", {
+  //         loggedInProfile,
+  //         movie_Id,
+  //       });
+  //     } else {
+  //       // User has swiped as first interaction between the two...
+  //       console.log(`You swiped on ${movie_Id.displayName}!`);
+  //       setDoc(
+  //         doc(db, "users", user.uid, "swipes", movie_Id.id),
+  //         movie_Id
+  //       );
+  //     }
+  //   }
+  // );
+  // setDoc(doc(db, "users", user.uid, "swipes", movie_Id.id), movie_Id);
   // };
 
   const viewMovie = (movieId) => {
@@ -341,6 +386,20 @@ const HomeScreen = () => {
         />
       </View>
       {/* END OF SWIPER CARDS */}
+
+      <RNPickerSelect
+        onValueChange={(value) => {
+          setRequestData({
+            ...requestData,
+            ...{ category: value },
+          });
+        }}
+        value={requestData.category}
+        items={[
+          { label: "top_rated", value: "top_rated" },
+          { label: "popular", value: "popular" },
+        ]}
+      />
 
       {/* BOTTOM BUTTONS */}
       <View className="flex flex-row justify-evenly bottom-6">
