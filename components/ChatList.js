@@ -6,33 +6,29 @@ import useAuth from "../hooks/useAuth";
 import ChatRow from "../components/ChatRow";
 
 const ChatList = () => {
-  const [matches, setMatches] = useState([]);
+  const [friends, setFriends] = useState([]);
   const { user } = useAuth();
 
   useEffect(
     () =>
       onSnapshot(
         query(
-          collection(db, "matches"),
-          where("usersMatched", "array-contains", user.uid)
+          collection(db,"users",user.uid ,"Friends")
         ),
         (snapshot) =>
-          setMatches(
-            snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }))
+          setFriends(
+            snapshot.docs.map((doc) => (doc.data()))
           )
       ),
     [user]
   );
 
-  return matches.length > 0 ? (
+  return friends.length > 0 ? (
     <FlatList
       className="h-full"
-      data={matches}
+      data={friends}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }) => <ChatRow matchDetails={item} />}
+      renderItem={({ item }) => <ChatRow userDetails={item} />}
     />
   ) : (
     <View>

@@ -13,6 +13,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Images, materialTheme } from "../constants";
 import { HeaderHeight } from "../constants/utils";
 import { useNavigation } from "@react-navigation/native";
+import Header from "../components/Header";
 
 const { width, height } = Dimensions.get("screen");
 const thumbMeasure = (width - 48 - 32) / 3;
@@ -49,6 +50,14 @@ const MovieScreen = ({ route }) => {
 
   return (
     <Block flex style={styles.profile}>
+      <Block style={styles.absoluteHeader}>
+        <LinearGradient
+          colors={["rgba(0,0,0,1)", "rgba(0,0,0,0)"]}
+          style={styles.reverseGradient}
+        />
+        <Header title={"Movie"} titlecolor="white"/>
+      </Block>
+
       <ImageBackground
         source={{
           uri: `https://image.tmdb.org/t/p/w600_and_h900_bestv2${movieData.poster_path}`,
@@ -104,60 +113,71 @@ const MovieScreen = ({ route }) => {
                 View IMDB
               </Text>
             </Block>
-            <Block style={{  }}>
-              <Text multiline style={{ margin: 10, marginBottom: 0 }} size={16}>{movieData.overview}</Text>
+            <Block style={{}}>
+              <Text multiline style={{ margin: 10, marginBottom: 0 }} size={16}>
+                {movieData.overview}
+              </Text>
               <Text
                 size={12}
-                style={{ margin: 10}}
+                style={{ margin: 10 }}
                 color={theme.COLORS.PRIMARY}
-                onPress={() => {Linking.openURL(movieData.homepage);}}
+                onPress={() => {
+                  Linking.openURL(movieData.homepage);
+                }}
               >
                 Home page
               </Text>
-              <Text size={16} style={{fontWeight: "bold",}}>
+              <Text size={16} style={{ fontWeight: "bold" }}>
                 Run time :
               </Text>
-              <Text multiline style={{ margin: 2 }} size={14}>{movieData.runtime} min</Text>
-              <Text size={16} style={{fontWeight: "bold",}}>
+              <Text multiline style={{ margin: 2 }} size={14}>
+                {movieData.runtime} min
+              </Text>
+              <Text size={16} style={{ fontWeight: "bold" }}>
                 Genres :
               </Text>
               {movieData.genres.map((genre) => (
                 <Text
-                  multiline style={{ margin: 2 , color: "#3A3B3C", }}
+                  multiline
+                  style={{ margin: 2, color: "#3A3B3C" }}
                   key={`viewed-${genre.name}`}
                   size={14}
                 >
                   - {genre.name}
                 </Text>
               ))}
-              <Text size={16} style={{fontWeight: "bold",}}>
-               Spoken languages :
+              <Text size={16} style={{ fontWeight: "bold" }}>
+                Spoken languages :
               </Text>
               {movieData.spoken_languages.map((genre) => (
                 <Text
-                  multiline style={{ margin: 2 , color: "#3A3B3C", }}
+                  multiline
+                  style={{ margin: 2, color: "#3A3B3C" }}
                   key={`viewed-${genre.english_name}`}
                   size={14}
                 >
                   - {genre.english_name}
                 </Text>
               ))}
-              <Text size={16} style={{fontWeight: "bold",}}>
-              Production companies :
+              <Text size={16} style={{ fontWeight: "bold" }}>
+                Production companies :
               </Text>
               {movieData.production_companies.map((genre) => (
                 <Text
-                  multiline style={{ margin: 2 , color: "#3A3B3C", }}
+                  multiline
+                  style={{ margin: 2, color: "#3A3B3C" }}
                   key={`viewed-${genre.name}`}
                   size={14}
                 >
                   - {genre.name}
                 </Text>
               ))}
-              <Text size={16} style={{fontWeight: "bold",}}>
-              Budget :
+              <Text size={16} style={{ fontWeight: "bold" }}>
+                Budget :
               </Text>
-              <Text multiline style={{ margin: 2 }} size={14}>{movieData.budget} $</Text>
+              <Text multiline style={{ margin: 2 }} size={14}>
+                {movieData.budget} $
+              </Text>
             </Block>
           </ScrollView>
         </Block>
@@ -170,14 +190,14 @@ export default MovieScreen;
 
 const styles = StyleSheet.create({
   profile: {
-    marginTop: Platform.OS === "android" ? -HeaderHeight : 0,
+    marginTop: 0,
   },
   profileImage: {
     width: width,
     height: "auto",
   },
   profileContainer: {
-    flex: 1.4,
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
     resizeMode: "contain",
@@ -234,11 +254,27 @@ const styles = StyleSheet.create({
     height: thumbMeasure,
   },
   gradient: {
-    zIndex: 1,
-    left: 0,
-    right: 0,
+    zIndex: 0,
+    left: "-100%",
+    right: "-100%",
     bottom: 0,
-    height: "30%",
+    height: "50%",
     position: "absolute",
+  },
+  reverseGradient: {
+    zIndex: 0,
+    left: "-100%",
+    right: "-100%",
+    top: 0,
+    height: "200%",
+    position: "absolute",
+  },
+  absoluteHeader: {
+    width: width,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    paddingTop:50,
+    zIndex: 3, // Make sure it's above other components
   },
 });

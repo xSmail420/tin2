@@ -27,6 +27,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 import RNPickerSelect from "react-native-picker-select";
+import generateId from "../lib/generateId";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -65,23 +66,20 @@ const HomeScreen = () => {
         fetchCards(data.results);
       })
       .catch((error) => console.log("error", error));
-      
   }, [requestData.page]);
 
   useEffect(() => {
     fetch(
       `https://api.themoviedb.org/3/movie/${requestData.category}?api_key=${requestData.api_key}&language=en-US&page=${requestData.page}`
     )
-    .then((response) => response.json())
-    .then((data) => {
-      fetchCards(data.results,true);
-    })
-    .catch((error) => console.log("error", error));
+      .then((response) => response.json())
+      .then((data) => {
+        fetchCards(data.results, true);
+      })
+      .catch((error) => console.log("error", error));
   }, [requestData.category]);
 
-
   const fetchCards = async (newMovies, reset = false) => {
-
     const passes = await getDocs(
       collection(db, "users", user.uid, "Nope")
     ).then((snapshot) => snapshot.docs.map((doc) => doc.id.toString()));
@@ -91,10 +89,13 @@ const HomeScreen = () => {
 
     const passesUserIds = passes.length > 0 ? passes : [];
     const swipedUserIds = swipes.length > 0 ? swipes : [];
-    
-      filtered = newMovies.filter(movie => !passesUserIds.includes(movie.id.toString()) && !swipedUserIds.includes(movie.id.toString()))
-        
-    
+
+    filtered = newMovies.filter(
+      (movie) =>
+        !passesUserIds.includes(movie.id.toString()) &&
+        !swipedUserIds.includes(movie.id.toString())
+    );
+
     if (filtered.length == 0) {
       setRequestData({
         ...requestData,
@@ -104,11 +105,9 @@ const HomeScreen = () => {
     if (reset) {
       setMovies(filtered);
     } else {
-      setMovies([...movies,...filtered]);
+      setMovies([...movies, ...filtered]);
     }
-    
-    }
-
+  };
 
   const swipeLeft = async (cardIndex) => {
     setCardInd(cardIndex);
@@ -142,18 +141,17 @@ const HomeScreen = () => {
     }
   };
 
-
   const createMatch = async () => {
     //create match with the two users
-    id_user2 = "QsXPGlspVyXysGUoYYZ7uHCUnRv2"
+    id_user2 = "QsXPGlspVyXysGUoYYZ7uHCUnRv2";
     if ("QsXPGlspVyXysGUoYYZ7uHCUnRv2" == user.uid) {
-      id_user2 = "rW5RTPXMCRfFBrMBZsIACr6lHsv1"
+      id_user2 = "rW5RTPXMCRfFBrMBZsIACr6lHsv1";
     }
 
     const loggedInProfile = await (
       await getDoc(doc(db, "users", user.uid))
     ).data();
-          
+
     const usersMatchedProfile = await (
       await getDoc(doc(db, "users", id_user2))
     ).data();
@@ -171,12 +169,7 @@ const HomeScreen = () => {
       loggedInProfile,
       usersMatchedProfile,
     });
-
-  }
-
-  const generateId = (id1 , id2) => {
-    return (id1+id2)
-  }
+  };
   // const swipeRight = async (cardIndex) => {
   //   setCardInd(cardIndex);
 
@@ -259,7 +252,23 @@ const HomeScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <View className="flex-1 -mt-6">
+      <View style={styles.picker} className="container justify-center items-center px-5 rounded-full" >
+        <RNPickerSelect
+          onValueChange={(value) => {
+            setRequestData({
+              ...requestData,
+              ...{ category: value },
+            });
+          }}
+          value={requestData.category}
+          items={[
+            { label: "top_rated", value: "top_rated" },
+            { label: "popular", value: "popular" },
+          ]}
+        />
+      </View>
+
+      <View className="flex-1 ">
         <Swiper
           ref={swipeRef}
           containerStyle={{ backgroundColor: "transparent" }}
@@ -298,7 +307,7 @@ const HomeScreen = () => {
           renderCard={(card) =>
             card ? (
               <View
-                className="relative bg-white h-5/6 rounded-xl"
+                className="relative bg-white h-4/6 rounded-xl"
                 style={styles.cardShadow}
                 key={card.id}
               >
@@ -380,32 +389,15 @@ const HomeScreen = () => {
           }
         />
       </View>
-      {/* END OF SWIPER CARDS */}
 
-      <RNPickerSelect
-        onValueChange={(value) => {
-          setRequestData({
-            ...requestData,
-            ...{ category: value },
-          });
-        }}
-        value={requestData.category}
-        items={[
-          { label: "top_rated", value: "top_rated" },
-          { label: "popular", value: "popular" },
-        ]}
-      />
-
-      {/* BOTTOM BUTTONS */}
       <View className="flex flex-row justify-evenly bottom-6">
-        {/* LEFT BUTTON*/}
         <TouchableOpacity
           className="items-center justify-center rounded-full w-16 h-16 bg-red-200"
           onPress={() => swipeRef.current.swipeLeft()}
         >
           <Entypo name="cross" size={30} color="red" />
         </TouchableOpacity>
-        {/* RIGHT BUTTON */}
+
         <TouchableOpacity
           className="items-center justify-center rounded-full w-16 h-16 bg-green-200"
           onPress={() => swipeRef.current.swipeRight()}
@@ -413,7 +405,6 @@ const HomeScreen = () => {
           <AntDesign name="heart" size={30} color="green" />
         </TouchableOpacity>
       </View>
-      {/* END OF BOTTOM BUTTONS */}
     </SafeAreaView>
   );
 };
@@ -429,12 +420,21 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
-
     elevation: 20,
+    marginVertical: "-10%",
   },
   text: {
     fontSize: 12,
     textAlign: "justify",
     lineHeight: 20,
   },
+  picker: {
+    marginVertical: 10,
+    marginHorizontal: "5%",
+    backgroundColor: "#dedede",
+    height: "5%",
+    width: "90%",
+  },
 });
+
+

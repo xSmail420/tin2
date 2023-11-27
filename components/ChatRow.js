@@ -2,31 +2,28 @@ import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import useAuth from "../hooks/useAuth";
-import getMatchedUserInfo from "../lib/getMatchedUserInfo";
 import { db } from "../firebase";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { collection, doc, getDocs, onSnapshot, orderBy, query } from "firebase/firestore";
+import generateId from "../lib/generateId";
 
-const ChatRow = ({ matchDetails }) => {
+const ChatRow = ({ userDetails }) => {
   const navigation = useNavigation();
   const { user } = useAuth();
-  const [matchedUserInfo, setMatchedUserInfo] = useState(null);
   const [lastMessage, setLastMessage] = useState("");
 
   useEffect(() => {
-    setMatchedUserInfo(getMatchedUserInfo(matchDetails.users, user.uid));
-  }, [matchDetails, user]);
-
-  useEffect(
-    () =>
+    try {
       onSnapshot(
-        query(
-          collection(db, "matches", matchDetails.id, "messages"),
-          orderBy("timestamp", "desc")
-        ),
-        (snapshot) => setLastMessage(snapshot.docs[0]?.data()?.message)
+      query(
+        collection(db, "messages", generateId(user.uid, userDetails.id), "chat"),
+        orderBy("timestamp", "desc")
       ),
-    [matchDetails, db]
-  );
+      (snapshot) => setLastMessage(snapshot.docs[0]?.data()?.message)
+    );
+    } catch (error) {
+      console.log(error);
+    }
+  }, [userDetails, db]);
 
   return (
     <TouchableOpacity
@@ -34,21 +31,21 @@ const ChatRow = ({ matchDetails }) => {
       style={styles.cardShadow}
       onPress={() =>
         navigation.navigate("Message", {
-          matchDetails,
+          userDetails,
         })
       }
     >
       <Image
         className="rounded-full h-16 w-16 mr-4"
         source={{
-          uri: matchedUserInfo?.photoURL,
+          uri: userDetails?.photoURL,
         }}
-        // matchedUserInfo?.photoURL
+        // userDetails?.photoURL
         //                ^ very important (at some point might be null)
       />
       <View>
         <Text className="text-lg font-semibold">
-          {matchedUserInfo?.displayName}
+          {userDetails?.displayName}
         </Text>
         <Text>{lastMessage || "Say Hi!👋 "}</Text>
       </View>

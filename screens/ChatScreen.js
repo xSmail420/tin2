@@ -5,7 +5,7 @@ import Header from "../components/Header";
 const ChatScreen = () => {
   return (
     <SafeAreaView>
-      <Header title="Chat" />
+      <Header title="Chat" searchEnabled={true} />
       <ChatList />
     </SafeAreaView>
   );

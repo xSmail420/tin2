@@ -12,13 +12,13 @@ const ModalScreen = () => {
   const [age, setAge] = useState(0);
   const navigation = useNavigation();
 
-  const incompleteForm = !image || !job || !age;
+  const incompleteForm = !job || !age;
 
   const updateUserProfile = async () => {
     setDoc(doc(db, "users", user.uid), {
       id: user.uid,
       displayName: user.displayName,
-      photoURL: image,
+      photoURL: image == "" || !image.includes("https://")? user.photoURL:image,
       job: job,
       age: age,
       timestamp: serverTimestamp(),
@@ -48,7 +48,7 @@ const ModalScreen = () => {
       </Text>
       <View>
         <TextInput
-          placeholder="Enter link to your profile picture here"
+          placeholder="update Profile pic (url)"
           className="text-center text-xl pb-2"
           value={image}
           onChangeText={setImage}

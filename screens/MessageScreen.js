@@ -6,6 +6,7 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  where,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
@@ -24,13 +25,13 @@ import Header from "../components/Header";
 import ReceiverMessage from "../components/ReceiverMessage";
 import SenderMessage from "../components/SenderMessage";
 import useAuth from "../hooks/useAuth";
-import getMatchedUserInfo from "../lib/getMatchedUserInfo";
 import { db } from "../firebase";
+import generateId from "../lib/generateId";
 
 const MessagesScreen = () => {
   const { user } = useAuth();
   const { params } = useRoute();
-  const { matchDetails } = params;
+  const { userDetails } = params;
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
 
@@ -38,7 +39,7 @@ const MessagesScreen = () => {
     () =>
       onSnapshot(
         query(
-          collection(db, "matches", matchDetails.id, "messages"),
+          collection(db,"messages",generateId(user.uid, userDetails.id),"chat"),
           orderBy("timestamp", "desc")
         ),
         (snapshot) =>
@@ -49,16 +50,16 @@ const MessagesScreen = () => {
             }))
           )
       ),
-    [matchDetails, db]
+    [userDetails, db]
   );
 
   const sendMessage = () => {
     if (input === "") return;
-    addDoc(collection(db, "matches", matchDetails.id, "messages"), {
+    addDoc(collection(db,"messages",generateId(user.uid, userDetails.id),"chat"), {
       timestamp: serverTimestamp(),
       userId: user.uid,
       displayName: user.displayName,
-      photoURL: matchDetails.users[user.uid].photoURL,
+      photoURL: user.photoURL,
       message: input,
     });
 
@@ -68,7 +69,7 @@ const MessagesScreen = () => {
   return (
     <SafeAreaView className="flex-1">
       <Header
-        title={getMatchedUserInfo(matchDetails.users, user.uid).displayName}
+        title={userDetails.displayName}
         callEnabled
       />
 
