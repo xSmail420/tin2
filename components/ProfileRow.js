@@ -71,12 +71,24 @@ const ProfileRow = ({ profileDetails }) => {
       style={styles.cardShadow}
     >
       <View className="flex-row items-center">
-        <Image
-          className="rounded-full h-16 w-16 mr-4"
-          source={{
-            uri: profileDetails?.photoURL,
-          }}
-        />
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate("Profile", {
+              user: {
+                uid: profileDetails.id,
+                photoURL: profileDetails.photoURL,
+                displayName: profileDetails.displayName,
+              },
+            })
+          }
+        >
+          <Image
+            className="rounded-full h-16 w-16 mr-4"
+            source={{
+              uri: profileDetails?.photoURL,
+            }}
+          />
+        </TouchableOpacity>
         <Text className="text-lg font-semibold">
           {profileDetails?.displayName}
         </Text>
@@ -96,7 +108,7 @@ const ProfileRow = ({ profileDetails }) => {
           style={{}}
           onPress={() =>
             navigation.navigate("Message", {
-                userDetails : profileDetails,
+              userDetails: profileDetails,
             })
           }
           className="p-1"

@@ -8,6 +8,7 @@ import MatchedScreen from "./screens/MatchedScreen";
 import MessageScreen from "./screens/MessageScreen";
 import MovieScreen from "./screens/MovieScreen";
 import SearchScreen from "./screens/SearchScreen";
+import ProfileScreen from "./screens/ProfileScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -27,6 +28,7 @@ const StackNavigator = () => {
             <Stack.Screen name="Chat" component={ChatScreen} />
             <Stack.Screen name="Message" component={MessageScreen} />
             <Stack.Screen name="Search" component={SearchScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
           </Stack.Group>
           <Stack.Group
             screenOptions={{

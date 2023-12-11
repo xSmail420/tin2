@@ -1,11 +1,9 @@
 import {
   View,
   Text,
-  Button,
   TouchableOpacity,
   Image,
   StyleSheet,
-  DevSettings,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import useAuth from "../hooks/useAuth";
@@ -16,14 +14,11 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   collection,
   doc,
-  DocumentSnapshot,
   getDoc,
   getDocs,
   onSnapshot,
-  query,
   serverTimestamp,
   setDoc,
-  where,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import RNPickerSelect from "react-native-picker-select";
@@ -230,7 +225,17 @@ const HomeScreen = () => {
   return (
     <SafeAreaView className="flex-1 top-2">
       <View className="flex-row items-center justify-between relative px-5">
-        <TouchableOpacity onPress={logout}>
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate("Profile", {
+              user: {
+                uid: user.uid,
+                photoURL: user.photoURL,
+                displayName: user.displayName,
+              },
+            })
+          }
+        >
           <Image
             source={{
               uri: user.photoURL,
@@ -252,7 +257,10 @@ const HomeScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.picker} className="container justify-center items-center px-5 rounded-full" >
+      <View
+        style={styles.picker}
+        className="container justify-center items-center px-5 rounded-full"
+      >
         <RNPickerSelect
           onValueChange={(value) => {
             setRequestData({
@@ -372,7 +380,7 @@ const HomeScreen = () => {
               </View>
             ) : (
               <View
-                className="relative bg-white h-4/5 rounded-xl justify-center items-center"
+                className="relative bg-white h-4/6 rounded-xl"
                 style={styles.cardShadow}
               >
                 <Text className="pb-5 font-bold">
@@ -436,5 +444,3 @@ const styles = StyleSheet.create({
     width: "90%",
   },
 });
-
-
